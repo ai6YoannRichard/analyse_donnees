@@ -66,7 +66,7 @@ class DataFilter:
         # 2. Filtrer sur les sinistres validés (critère essentiel)
         if 'est_sinistre' in filtered_df.columns:
             initial_rows = len(filtered_df)
-            filtered_df['est_sinistre'] = self._boolify(filtered_df['est_sinistre_cas_valide'])
+            filtered_df['est_sinistre'] = self._boolify(filtered_df['est_dans_sin_cluster'])
             filtered_df = filtered_df[filtered_df['est_sinistre'] == True]
             removed = initial_rows - len(filtered_df)
             if removed > 0:

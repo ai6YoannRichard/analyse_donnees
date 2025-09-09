@@ -200,7 +200,7 @@ def main() -> None:
                 "apply_quality": True,
                 "apply_business": True,
                 # Dates par défaut pour sécheresse récente
-                "date_range": ("2021-01-01", "2024-12-31"),
+                "date_range": ("2018-01-01", "2024-12-31"),
             },
             "export_params": {
                 **config.get("export_params", {}),

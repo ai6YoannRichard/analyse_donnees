@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from pprint import pprint
 from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import warnings
 
 import pandas as pd
@@ -91,7 +91,23 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
         self.config.setdefault("date_column", "date_sinistre")
         self.config.setdefault("target_variable", "montant_charge_brut")
 
-        logger.info("Analyseur de sinistres sécheresse initialisé")    
+        logger.info("Analyseur de sinistres sécheresse initialisé") 
+
+    def _json_default(obj):
+        
+        # NumPy -> Python
+        if isinstance(obj, (np.integer, np.int64, np.int32)): return int(obj)
+        if isinstance(obj, (np.floating, np.float64, np.float32)): return float(obj)
+        if isinstance(obj, (np.bool_,)): return bool(obj)
+        # Pandas
+        if isinstance(obj, pd.Series):    return obj.tolist()
+        if isinstance(obj, pd.DataFrame): return obj.to_dict(orient="list")
+        if isinstance(obj, pd.Timestamp): return obj.isoformat()
+        if isinstance(obj, pd.Period):    return str(obj)
+        # Datetime natif
+        if isinstance(obj, (datetime, date)): return obj.isoformat()
+        # fallback
+        return str(obj)   
 
     def _resolve_params(self, key_in_self_config: str, passed) -> dict:
         """
@@ -1072,20 +1088,26 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
         """
         Workflow complet spécialisé sécheresse :
         load -> filter (pass-through si absent) -> preprocess (fallback auto) -> analyses -> visus.
-        Crée une série mensuelle (mmAAAA) et l'attache au rapport si possible.
-        Retourne un dict de résultats + figures + monthly_frames.
+        Crée une série mensuelle (mmAAAA), exporte HTML/PNG/CSV/JSON et retourne les chemins d’export.
         """
         logger.info("🚀 LANCEMENT DE L'ANALYSE COMPLÈTE SÉCHERESSE")
 
-        # --- petite aide interne pour fusionner kwargs locaux avec config par défaut ---
+        # --- helper local pour fusionner config et kwargs ---
         def _resolve_params(key: str, local: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             base = {}
-            # on permet aussi d'avoir des par défaut dans self.config
             if isinstance(self.config.get(key), dict):
                 base.update(self.config.get(key))
             if isinstance(local, dict):
                 base.update(local)
             return base
+
+        from pathlib import Path
+        import json
+        import os
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from datetime import datetime
 
         target_var = self.config.get("target_variable", "montant_charge_brut")
         date_col   = self.config.get("date_column", "date_sinistre")
@@ -1096,9 +1118,7 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
         visualizer_params = _resolve_params("visualizer_params", kwargs.get("visualizer_params"))
 
         # -------- 1) LOAD --------
-        from pathlib import Path
         ext = str(Path(file_path).suffix).lower()
-        # si Excel/ODS: on retire les kwargs CSV non supportés
         if ext in (".xlsx", ".xls", ".xlsm", ".xlsb", ".ods"):
             for bad in ("sep", "delimiter"):
                 load_params.pop(bad, None)
@@ -1114,15 +1134,13 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
             if filter_params:
                 self.filter_data(**filter_params)
             else:
-                # pass-through
                 self.filtered_data = self.raw_data.copy()
                 logger.info("Aucun filtre fourni → filtered_data = raw_data (pass-through).")
         except Exception:
             logger.exception("Échec du filtrage, fallback pass-through.")
             self.filtered_data = self.raw_data.copy()
 
-        # garde-fou : si None ou vide → fallback
-        import pandas as pd
+        # Garde-fou : si None ou vide → fallback
         if (getattr(self, "filtered_data", None) is None
             or (isinstance(self.filtered_data, pd.DataFrame) and self.filtered_data.empty)):
             logger.warning("filtered_data absent ou vide → fallback sur raw_data.")
@@ -1181,16 +1199,16 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
             insights = {"error": str(e)}
 
         # -------- 5) VISUALISATIONS (incl. série mensuelle mmAAAA) --------
-        figures = {}
+        figures: Dict[str, plt.Figure] = {}
         try:
-            figures.update(self.create_advanced_visualizations() or {})
+            figs = self.create_advanced_visualizations() or {}
+            figures.update(figs)
         except Exception:
             logger.warning("Visualisations avancées non générées.", exc_info=True)
 
         # Série mensuelle (mmAAAA)
+        monthly_frames: Dict[str, pd.DataFrame] = {}
         try:
-            import matplotlib.pyplot as plt
-
             df = self.processed_data.copy()
             if date_col in df.columns and target_var in df.columns:
                 agg = str(visualizer_params.get("monthly_agg", "sum"))
@@ -1202,7 +1220,6 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
                 d = d.dropna(subset=[date_col, target_var])
 
                 if len(d):
-                    # Index mensuel et agrégation dynamique
                     d["ym"] = d[date_col].dt.to_period("M")
                     grouped = d.groupby("ym")[target_var]
                     try:
@@ -1211,11 +1228,9 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
                         logger.warning(f"Agrégation '{agg}' non supportée, fallback 'sum'.")
                         series = grouped.sum()
 
-                    # couverture de l'intervalle temporel (tous les mois)
                     full_idx = pd.period_range(series.index.min(), series.index.max(), freq="M")
                     series   = series.reindex(full_idx, fill_value=0)
 
-                    # Optionnel: masquer les mois avec peu d'observations
                     if min_count > 0:
                         counts = d.groupby("ym").size().reindex(full_idx, fill_value=0)
                         series = series.where(counts >= min_count, np.nan)
@@ -1228,13 +1243,28 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
                     ax.set_ylabel(f"{target_var} ({agg})")
                     ax.set_title(f"Série mensuelle {target_var} – ({agg})")
                     ax.tick_params(axis="x", rotation=90)
-                    step = max(1, len(x_labels) // 24)  # alléger les ticks (~24 max)
+                    step = max(1, len(x_labels) // 24)
                     for i, lbl in enumerate(ax.get_xticklabels()):
                         lbl.set_visible(i % step == 0)
                     ax.grid(True, axis="y", alpha=0.3)
                     plt.tight_layout()
 
-                    # Attacher au rapport si possible
+                    figures["monthly_series_mmAAAA"] = fig
+
+                    monthly_frame = pd.DataFrame({
+                        "ym": [str(p) for p in full_idx],        # ex: '2022-07'
+                        "mmAAAA": x_labels,                      # ex: '072022'
+                        f"{target_var}_{agg}": series.values
+                    })
+                    # ranger sans écraser la clé
+                    key = "mmAAAA"
+                    i = 2
+                    while key in monthly_frames:
+                        key = f"mmAAAA_{i}"
+                        i += 1
+                    monthly_frames[key] = monthly_frame
+
+                    # Push au rapport si AdvancedReportGenerator dispo
                     try:
                         sm  = getattr(self, "synthesis_manager", None)
                         gen = getattr(sm, "advanced_generator", None) if sm else None
@@ -1244,42 +1274,128 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
                                 fig,
                                 f"Série mensuelle de {target_var} agrégée ({agg}) au format mmAAAA."
                             )
+                            # Injecter un minimum d'infos textuelles dans le rapport
+                            gen.analysis_results = getattr(gen, "analysis_results", {})
+                            gen.analysis_results.setdefault("metadata", {})["generated_at"] = datetime.now().isoformat()
+                            gen.analysis_results.setdefault("insights", insights)
+                            gen.analysis_results.setdefault("climate", climate)
+                            gen.analysis_results.setdefault("vulnerability", vulnera)
+                            gen.analysis_results.setdefault("exposure", exposure)
+                            gen.analysis_results.setdefault("segmentation", segment)
                     except Exception:
-                        logger.debug("Impossible d’attacher la figure au rapport.", exc_info=True)
-
-                    figures["monthly_series_mmAAAA"] = fig
-
-                    # --- DataFrame mensuel prêt à l'emploi (mmAAAA) ---
-                    monthly_frame = pd.DataFrame({
-                        "ym": full_idx.astype(str),              # ex: '2022-07'
-                        "mmAAAA": x_labels,                      # ex: '072022'
-                        f"{target_var}_{agg}": series.values
-                    })
-
-                    # 1) Stockage dans self.results sans écraser
-                    try:
-                        self.results = getattr(self, "results", {})
-                        base = "monthly_frame"
-                        key = base
-                        i = 2
-                        while key in self.results:
-                            key = f"{base}_{i}"
-                            i += 1
-                        self.results[key] = monthly_frame
-                    except Exception:
-                        logger.debug("Impossible d’enregistrer monthly_frame dans self.results.", exc_info=True)
-
-                    # 2) On exposera aussi via la sortie 'out' ci-dessous (sans écraser)
-                    _monthly_for_out = ("mmAAAA", monthly_frame)
-                else:
-                    _monthly_for_out = None
-            else:
-                _monthly_for_out = None
+                        logger.debug("Impossible d’attacher la figure/sections au rapport.", exc_info=True)
         except Exception:
             logger.warning("Échec génération série mensuelle mmAAAA.", exc_info=True)
-            _monthly_for_out = None
 
-        # -------- 6) SORTIE --------
+        # -------- 6) EXPORTS (HTML/PNG/CSV/JSON) --------
+        export_paths: Dict[str, str] = {}
+        index_path: Optional[str] = None
+
+        try:
+            base_out = Path(self.config.get("output_dir", "./outputs/drought_analysis")).resolve()
+            ts_dir = base_out / datetime.now().strftime("%Y%m%d_%H%M%S")
+            ts_dir.mkdir(parents=True, exist_ok=True)
+
+            # 6.a) Sauvegarde figures en PNG
+            for name, fig in figures.items():
+                try:
+                    png_path = ts_dir / f"{name}.png"
+                    fig.savefig(png_path, dpi=150, bbox_inches="tight")
+                    export_paths[name] = str(png_path)
+                except Exception:
+                    logger.warning(f"Impossible d'enregistrer la figure {name}.", exc_info=True)
+
+            # 6.b) Sauvegarde des séries mensuelles en CSV
+            for key, frame in monthly_frames.items():
+                try:
+                    csv_path = ts_dir / f"monthly_{key}.csv"
+                    frame.to_csv(csv_path, index=False, encoding="utf-8")
+                    export_paths[f"monthly_{key}"] = str(csv_path)
+                except Exception:
+                    logger.warning(f"Impossible d'enregistrer la série mensuelle {key}.", exc_info=True)
+
+            # 6.c) JSON complet des résultats
+            try:
+                json_path = ts_dir / "results_drought.json"
+                dumpable = {
+                    "insights": insights,
+                    "climate": climate,
+                    "vulnerability": vulnera,
+                    "exposure": exposure,
+                    "segmentation": segment,
+                    "figures": list(figures.keys()),
+                    "monthly_frames": {k: v.to_dict(orient="list") for k, v in monthly_frames.items()},
+                }
+                with open(json_path, "w", encoding="utf-8") as f:
+                    json.dump(dumpable, f, ensure_ascii=False, indent=2, default=self._json_default)
+                export_paths["results_json"] = str(json_path)
+            except Exception:
+                logger.warning("Impossible d'enregistrer le JSON des résultats.", exc_info=True)
+
+            # 6.d) Rapport HTML minimal (index.html)
+            try:
+                html_path = ts_dir / "index.html"
+                title = f"Analyse Sécheresse – {Path(file_path).name}"
+                # simple HTML
+                parts = [
+                    "<!doctype html><html lang='fr'><head><meta charset='utf-8'/>",
+                    f"<title>{title}</title>",
+                    "<style>body{font-family:system-ui,Arial,sans-serif;max-width:1100px;margin:30px auto;padding:0 16px;}",
+                    "h1{margin:0 0 12px;} h2{margin-top:28px;} .fig{margin:18px 0;} img{max-width:100%;height:auto;border:1px solid #ddd;border-radius:8px;} pre{background:#f7f7f7;padding:12px;border-radius:8px;overflow:auto;} table{border-collapse:collapse;} td,th{border:1px solid #ddd;padding:6px 8px;}</style>",
+                    "</head><body>",
+                    f"<h1>{title}</h1>",
+                    f"<p>Généré le {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</p>",
+                    "<h2>Insights</h2>",
+                    "<pre>" + json.dumps(insights, ensure_ascii=False, indent=2) + "</pre>",
+                ]
+
+                if monthly_frames:
+                    parts.append("<h2>Séries mensuelles (mmAAAA)</h2>")
+                    for k in monthly_frames:
+                        csv_name = Path(export_paths.get(f"monthly_{k}", "")).name
+                        if csv_name:
+                            parts.append(f"<p>• <a href='{csv_name}' download>Télécharger {csv_name}</a></p>")
+
+                if export_paths:
+                    parts.append("<h2>Figures</h2>")
+                    for k, pth in export_paths.items():
+                        if pth.endswith(".png"):
+                            parts.append(f"<div class='fig'><h3>{k}</h3><img src='{Path(pth).name}' alt='{k}'/></div>")
+
+                parts.append("</body></html>")
+                with open(html_path, "w", encoding="utf-8") as f:
+                    f.write("".join(parts))
+
+                index_path = str(html_path)
+                export_paths["index_html"] = index_path
+            except Exception:
+                logger.warning("Impossible de générer le rapport HTML.", exc_info=True)
+
+            # 6.e) Si AdvancedReportGenerator est dispo, on tente aussi son export multi-format
+            try:
+                sm  = getattr(self, "synthesis_manager", None)
+                gen = getattr(sm, "advanced_generator", None) if sm else None
+                if gen:
+                    # S'assurer d'un minimum de contenu textuel déjà injecté ci-dessus
+                    title = f"Analyse Sécheresse - {Path(file_path).stem}"
+                    paths = gen.export_all_formats(title)
+                    # on ajoute au dict export_paths
+                    if isinstance(paths, dict):
+                        for k, v in paths.items():
+                            export_paths[f"advanced_{k}"] = str(v)
+                        if not index_path:
+                            for v in paths.values():
+                                if isinstance(v, (str, Path)) and str(v).lower().endswith(".html"):
+                                    index_path = str(v)
+                                    break
+                        
+            except Exception:
+                logger.debug("Export AdvancedReportGenerator ignoré (non configuré ou erreur).", exc_info=True)
+
+        except Exception:
+            logger.exception("Bloc d'export: erreur inattendue.")
+
+        # -------- 7) SORTIE --------
         out: Dict[str, Any] = {
             "climate": climate,
             "vulnerability": vulnera,
@@ -1287,21 +1403,9 @@ class DroughtClaimsAnalyzer(SinistreAnalysisPipeline):
             "segmentation": segment,
             "insights": insights,
             "figures": list(figures.keys()),
+            "monthly_frames": monthly_frames,  # DataFrames
+            "reports": export_paths,           # chemins des fichiers exportés
+            "index": index_path,               # chemin vers l'HTML principal
         }
-        # Ajouter la (les) table(s) mensuelle(s) sans écraser
-        try:
-            if _monthly_for_out is not None:
-                subkey, frame = _monthly_for_out
-                out_frames = out.get("monthly_frames", {})
-                sk = subkey
-                j = 2
-                while sk in out_frames:
-                    sk = f"{subkey}_{j}"
-                    j += 1
-                out_frames[sk] = frame
-                out["monthly_frames"] = out_frames
-        except Exception:
-            logger.debug("Impossible d’ajouter monthly_frame dans out.", exc_info=True)
-
         logger.info("✅ Analyse sécheresse terminée")
         return out

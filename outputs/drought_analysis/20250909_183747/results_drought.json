@@ -1,0 +1,433 @@
+{
+  "insights": {
+    "timestamp": "2025-09-09T18:37:46.481410",
+    "analysis_type": "Sinistres Sécheresse",
+    "key_findings": [
+      "0.0% des sinistres en conditions de sécheresse estimée."
+    ],
+    "recommendations": [
+      "Renforcer la surveillance des zones à fort risque RGA identifiées",
+      "Développer des produits adaptés aux bâtiments anciens en zone sèche",
+      "Mettre en place un système d'alerte précoce basé sur les données météo",
+      "Optimiser les tarifs selon les scores de vulnérabilité calculés"
+    ],
+    "risk_factors_ranking": [],
+    "cost_drivers": [],
+    "geographical_insights": [],
+    "temporal_patterns": [
+      "Pics saisonniers: Août, Déc, Sep",
+      "Tendance baissière (corr=-0.775)."
+    ]
+  },
+  "climate": {
+    "precipitation_analysis": {
+      "statistics_by_category": {
+        "count": {
+          "Très sec": 94,
+          "Sec": 0,
+          "Normal+": 0
+        },
+        "mean": {
+          "Très sec": 15645.93,
+          "Sec": NaN,
+          "Normal+": NaN
+        },
+        "median": {
+          "Très sec": 6354.56,
+          "Sec": NaN,
+          "Normal+": NaN
+        },
+        "std": {
+          "Très sec": 25788.33,
+          "Sec": NaN,
+          "Normal+": NaN
+        },
+        "p90": {
+          "Très sec": 39411.33,
+          "Sec": NaN,
+          "Normal+": NaN
+        },
+        "p95": {
+          "Très sec": 64272.66,
+          "Sec": NaN,
+          "Normal+": NaN
+        }
+      },
+      "correlation": 0.13048312767804396,
+      "kruskal_test": {
+        "statistic": NaN,
+        "p_value": NaN
+      },
+      "interpretation": "Précipitations: corrélation positive r=0.130. "
+    },
+    "temperature_analysis": {
+      "statistics_by_category": {
+        "count": {
+          "Fraîche": 94,
+          "Modérée": 0,
+          "Chaude": 0
+        },
+        "mean": {
+          "Fraîche": 15645.93,
+          "Modérée": NaN,
+          "Chaude": NaN
+        },
+        "median": {
+          "Fraîche": 6354.56,
+          "Modérée": NaN,
+          "Chaude": NaN
+        },
+        "std": {
+          "Fraîche": 25788.33,
+          "Modérée": NaN,
+          "Chaude": NaN
+        },
+        "p90": {
+          "Fraîche": 39411.33,
+          "Modérée": NaN,
+          "Chaude": NaN
+        },
+        "p95": {
+          "Fraîche": 64272.66,
+          "Modérée": NaN,
+          "Chaude": NaN
+        }
+      },
+      "correlation": 0.029732641726604527,
+      "kruskal_test": {
+        "statistic": NaN,
+        "p_value": NaN
+      },
+      "interpretation": "Température: corrélation positive r=0.030. "
+    },
+    "drought_conditions": {
+      "drought_conditions_stats": {
+        "count": {
+          "Pas de sécheresse": 0,
+          "Sécheresse légère": 94,
+          "Sécheresse modérée": 0,
+          "Sécheresse sévère": 0
+        },
+        "mean": {
+          "Pas de sécheresse": NaN,
+          "Sécheresse légère": 15645.93,
+          "Sécheresse modérée": NaN,
+          "Sécheresse sévère": NaN
+        },
+        "median": {
+          "Pas de sécheresse": NaN,
+          "Sécheresse légère": 6354.56,
+          "Sécheresse modérée": NaN,
+          "Sécheresse sévère": NaN
+        },
+        "std": {
+          "Pas de sécheresse": NaN,
+          "Sécheresse légère": 25788.33,
+          "Sécheresse modérée": NaN,
+          "Sécheresse sévère": NaN
+        },
+        "p90": {
+          "Pas de sécheresse": NaN,
+          "Sécheresse légère": 39411.33,
+          "Sécheresse modérée": NaN,
+          "Sécheresse sévère": NaN
+        },
+        "p95": {
+          "Pas de sécheresse": NaN,
+          "Sécheresse légère": 64272.66,
+          "Sécheresse modérée": NaN,
+          "Sécheresse sévère": NaN
+        }
+      },
+      "drought_vs_normal": {
+        "count": {
+          "false": 94
+        },
+        "mean": {
+          "false": 15645.93
+        },
+        "median": {
+          "false": 6354.56
+        },
+        "std": {
+          "false": 25788.33
+        }
+      },
+      "mann_whitney_test": {
+        "statistic": NaN,
+        "p_value": NaN
+      },
+      "drought_percentage": 0.0,
+      "interpretation": "Sécheresse: effet non significatif (Mann-Whitney p=nan)."
+    },
+    "seasonal_climate": {
+      "by_month": {
+        "montant_mean": {
+          "1": 7896.1,
+          "3": 9378.12,
+          "4": 8713.25,
+          "5": 5894.04,
+          "6": 2766.0,
+          "7": 13555.0,
+          "8": 31558.42,
+          "9": 16274.4,
+          "10": 9917.76,
+          "11": 16036.42,
+          "12": 28409.2
+        },
+        "precip_mean": {
+          "1": -0.0,
+          "3": -0.02,
+          "4": -0.01,
+          "5": -0.02,
+          "6": -0.01,
+          "7": -0.0,
+          "8": -0.0,
+          "9": 0.0,
+          "10": -0.0,
+          "11": 0.0,
+          "12": -0.02
+        },
+        "temp_mean": {
+          "1": 0.74,
+          "3": 0.69,
+          "4": 0.7,
+          "5": 0.59,
+          "6": 0.72,
+          "7": 0.7,
+          "8": 0.69,
+          "9": 0.7,
+          "10": 0.7,
+          "11": 0.69,
+          "12": 0.58
+        },
+        "n": {
+          "1": 1,
+          "3": 2,
+          "4": 4,
+          "5": 1,
+          "6": 5,
+          "7": 32,
+          "8": 15,
+          "9": 18,
+          "10": 13,
+          "11": 2,
+          "12": 1
+        }
+      },
+      "corr_montant_precip": 0.12145427096808867,
+      "corr_montant_temp": -0.3450144401045558
+    }
+  },
+  "vulnerability": {
+    "age_analysis": {
+      "age_categories_stats": {
+        "count": {
+          "Très récent (0-20)": 7,
+          "Récent (20-40)": 29,
+          "Moyen (40-60)": 38,
+          "Ancien (60-100)": 10,
+          "Très ancien (100+)": 10
+        },
+        "mean": {
+          "Très récent (0-20)": 16720.74,
+          "Récent (20-40)": 23346.89,
+          "Moyen (40-60)": 9814.79,
+          "Ancien (60-100)": 18970.06,
+          "Très ancien (100+)": 11395.01
+        },
+        "median": {
+          "Très récent (0-20)": 7227.28,
+          "Récent (20-40)": 11105.3,
+          "Moyen (40-60)": 5931.99,
+          "Ancien (60-100)": 6432.92,
+          "Très ancien (100+)": 5599.8
+        },
+        "std": {
+          "Très récent (0-20)": 24556.08,
+          "Récent (20-40)": 37031.1,
+          "Moyen (40-60)": 13204.8,
+          "Ancien (60-100)": 30337.44,
+          "Très ancien (100+)": 14095.12
+        },
+        "p90": {
+          "Très récent (0-20)": 37196.97,
+          "Récent (20-40)": 60604.38,
+          "Moyen (40-60)": 30004.39,
+          "Ancien (60-100)": 55333.24,
+          "Très ancien (100+)": 30405.64
+        }
+      },
+      "correlation": -0.07430812149428019,
+      "spearman_trend": {
+        "rho": -0.14778079468285782,
+        "p_value": 0.15519035109491755
+      },
+      "interpretation": "corr(age, montant)=-0.074 ; Spearman ρ=-0.148 (p=0.155)"
+    },
+    "surface_analysis": {
+      "quartiles_stats": {
+        "count": {
+          "Q1": 19,
+          "Q2": 18,
+          "Q3": 18,
+          "Q4": 18
+        },
+        "mean": {
+          "Q1": 18827.03,
+          "Q2": 17278.21,
+          "Q3": 19033.06,
+          "Q4": 18548.34
+        },
+        "median": {
+          "Q1": 6156.0,
+          "Q2": 6794.89,
+          "Q3": 5809.69,
+          "Q4": 12000.74
+        },
+        "std": {
+          "Q1": 30162.07,
+          "Q2": 31227.82,
+          "Q3": 32488.2,
+          "Q4": 21518.66
+        }
+      },
+      "spearman": {
+        "rho": 0.1187840829364205,
+        "p_value": 0.31686354285113855
+      }
+    },
+    "wall_type_analysis": {
+      "by_wall_type": {
+        "count": {
+          "AGGLOMERE": 20,
+          "AGGLOMERE - BETON": 4,
+          "AGGLOMERE - BRIQUES": 2,
+          "AGGLOMERE - MEULIERE": 1,
+          "AGGLOMERE - PIERRE": 1,
+          "AUTRES": 1,
+          "BETON": 6,
+          "BETON - AUTRES": 1,
+          "BETON - BRIQUES": 1,
+          "BETON - MEULIERE": 2,
+          "BETON - PIERRE": 1,
+          "BRIQUES": 35,
+          "BRIQUES - MEULIERE": 1,
+          "BRIQUES - PIERRE": 2,
+          "MEULIERE": 10,
+          "PIERRE": 6
+        },
+        "mean": {
+          "AGGLOMERE": 13970.83,
+          "AGGLOMERE - BETON": 65347.2,
+          "AGGLOMERE - BRIQUES": 34330.9,
+          "AGGLOMERE - MEULIERE": 7707.91,
+          "AGGLOMERE - PIERRE": 780.0,
+          "AUTRES": 4504.8,
+          "BETON": 8320.29,
+          "BETON - AUTRES": 125445.22,
+          "BETON - BRIQUES": 9534.84,
+          "BETON - MEULIERE": 5412.66,
+          "BETON - PIERRE": 8795.31,
+          "BRIQUES": 11461.21,
+          "BRIQUES - MEULIERE": 28864.6,
+          "BRIQUES - PIERRE": 3060.92,
+          "MEULIERE": 11425.39,
+          "PIERRE": 15558.8
+        },
+        "median": {
+          "AGGLOMERE": 6406.25,
+          "AGGLOMERE - BETON": 65973.09,
+          "AGGLOMERE - BRIQUES": 34330.9,
+          "AGGLOMERE - MEULIERE": 7707.91,
+          "AGGLOMERE - PIERRE": 780.0,
+          "AUTRES": 4504.8,
+          "BETON": 3005.69,
+          "BETON - AUTRES": 125445.22,
+          "BETON - BRIQUES": 9534.84,
+          "BETON - MEULIERE": 5412.66,
+          "BETON - PIERRE": 8795.31,
+          "BRIQUES": 5970.0,
+          "BRIQUES - MEULIERE": 28864.6,
+          "BRIQUES - PIERRE": 3060.92,
+          "MEULIERE": 8243.65,
+          "PIERRE": 10786.9
+        },
+        "std": {
+          "AGGLOMERE": 27074.41,
+          "AGGLOMERE - BETON": 52380.97,
+          "AGGLOMERE - BRIQUES": 23657.03,
+          "AGGLOMERE - MEULIERE": NaN,
+          "AGGLOMERE - PIERRE": NaN,
+          "AUTRES": NaN,
+          "BETON": 13867.64,
+          "BETON - AUTRES": NaN,
+          "BETON - BRIQUES": NaN,
+          "BETON - MEULIERE": 3264.21,
+          "BETON - PIERRE": NaN,
+          "BRIQUES": 17599.71,
+          "BRIQUES - MEULIERE": NaN,
+          "BRIQUES - PIERRE": 3480.26,
+          "MEULIERE": 12992.47,
+          "PIERRE": 14815.79
+        }
+      },
+      "kruskal": {
+        "H": null,
+        "p_value": null
+      }
+    },
+    "rooms_analysis": {
+      "by_rooms": {
+        "count": {
+          "3.0": 4,
+          "4.0": 15,
+          "5.0": 31,
+          "6.0": 22,
+          "7.0": 13,
+          "8.0": 3,
+          "9.0": 2,
+          "10.0": 3,
+          "10.489999999999952": 1
+        },
+        "mean": {
+          "3.0": 6215.28,
+          "4.0": 10068.99,
+          "5.0": 14129.97,
+          "6.0": 20298.43,
+          "7.0": 12483.91,
+          "8.0": 59245.16,
+          "9.0": 19911.2,
+          "10.0": 7691.01,
+          "10.489999999999952": 7305.71
+        },
+        "median": {
+          "3.0": 6878.66,
+          "4.0": 5521.83,
+          "5.0": 5894.04,
+          "6.0": 12195.3,
+          "7.0": 5862.0,
+          "8.0": 44394.17,
+          "9.0": 19911.2,
+          "10.0": 8795.31,
+          "10.489999999999952": 7305.71
+        },
+        "std": {
+          "3.0": 3994.69,
+          "4.0": 14740.31,
+          "5.0": 26243.06,
+          "6.0": 27381.49,
+          "7.0": 25013.85,
+          "8.0": 60165.3,
+          "9.0": 4430.45,
+          "10.0": 6608.42,
+          "10.489999999999952": NaN
+        }
+      },
+      "spearman": {
+        "rho": 0.19717316822234662,
+        "p_value": 0.056801966262999756
+      }
+    },
+    "vulnerability_score": {
+      "per_row": 
