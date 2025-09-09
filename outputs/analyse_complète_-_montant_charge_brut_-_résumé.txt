@@ -1,0 +1,18 @@
+Analyse Complète - montant_charge_brut - Résumé
+===============================================
+
+Généré le: 09/09/2025 à 16:38
+
+RÉSUMÉ EXÉCUTIF
+---------------
+Total Records: 9
+Average Amount: 7122.52
+Total Amount: 64102.71
+Period Coverage: 04/2022 - 09/2022
+
+Points clés:
+1. Analyse de 9 sinistres après filtrage et nettoyage
+2. Identification de 55 variables fortement corrélées avec montant_charge_brut
+3. Analyse de segmentation sur 3 dimensions métier
+
+Nombre de visualisations générées: 4
